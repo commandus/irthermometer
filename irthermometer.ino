@@ -1,6 +1,23 @@
 /**
+ * 
+ * Read temperature from IR thermometer in Kelvin degrees * 100
+ * 
+ * andrey.ivanov@ikfia.ysn.ru
+ * 
+ * Connect to COM port (Digispark bootloader runs code after 5s delay)
+ * 
+ * Send '0' character to read temperature from IR sensor
+ * Send '1' character to read temperature from the chip (ambient temperature)
+ * Send '2' character to read program loops(for debug)
+ * 
+ * Digispark AtTiny85 blinks when character has been received and respond
+ * with decimal number e.g.
+ * 27315 means 0C
+ * 
  * mlx90614 https://www.melexis.com/-/media/files/documents/datasheets/mlx90614-datasheet-melexis.pdf
- *  Pins: 
+ * 
+ * Pins: 
+ *  
  *    0: SDA
  *    2: SCL
  *
@@ -15,9 +32,8 @@
 #include <DigiCDC.h>
 #include <TinyWireM.h>
 
-int TINY_SDA =     0; // ATtiny SDA pin 5
-int TINY_SCL =     2; // ATtiny SCL pin 7
-int TINY_LED =     1; // ATtiny LED
+// ATtiny LED
+#define TINY_LED 1
 
 #define MLX90614_I2CADDR 0x5A
 // RAM
@@ -70,7 +86,7 @@ void setup() {
 }
 
 int c = 0;
-uint16_t data[2] = {-1, -1};
+uint16_t data[3] = {-1, -1, 0};
 
 // the loop routine runs over and over again forever:
 void loop() {
@@ -94,9 +110,10 @@ void loop() {
     }
   }
   // keep usb alive, can also use SerialUSB.refresh();
-  SerialUSB.delay(100);
+  SerialUSB.delay(10);
   // Object temperature
   data[0] = readK100(MLX90614_TOBJ1);
   // Ambient temperature
   data[1] = readK100(MLX90614_TA);
+  data[2]++;
 }
