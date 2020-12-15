@@ -161,6 +161,7 @@ uint8_t readK100(
     // error
     return r;
   }
+  crcbuffer[1] = registerAddress;
   // receive DATA
   crcbuffer[3] = TinyWireM.read();     // LSB
   crcbuffer[4] = TinyWireM.read();     // MSB
@@ -186,7 +187,6 @@ void setup() {
   // Init MELEXIS sensor
   TinyWireM.begin();
 }
-
 
 // the loop routine runs over and over again forever:
 void loop() {
@@ -221,8 +221,12 @@ void loop() {
     data[3] = r;
   }
   // Ambient temperature
-  if (data[2] % 1024) {
+  if ((data[2] % 1024) == 0) {
     r = readK100(data[1], MLX90614_TA);  
+    if (r) {
+      // Set data[3] to error code if failed
+      data[3] = r;
+    }
   }
   data[2]++;
 }
